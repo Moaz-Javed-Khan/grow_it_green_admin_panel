@@ -20,6 +20,8 @@ class _PlantEncyclopediaViewState extends State<PlantEncyclopediaView> {
   final updatedWateringFrequencyController = TextEditingController();
   final updatedAmountOfWaterController = TextEditingController();
 
+  bool isLoading = false;
+
   XFile? _image;
   final picker = ImagePicker();
 
@@ -405,39 +407,52 @@ class _PlantEncyclopediaViewState extends State<PlantEncyclopediaView> {
               },
               child: const Text("Cancel"),
             ),
-            TextButton(
-              onPressed: () async {
-                if (_image == null) return;
-                var imageRef = FirebaseStorage.instance
-                    .ref('/plantImages/${_image!.path.split('/').last}.jpeg');
+            StatefulBuilder(builder: (context, setState) {
+              return TextButton(
+                onPressed: () async {
+                  setState(() {
+                    isLoading = true;
+                  });
 
-                var uploadTask = imageRef.putData(await _image!.readAsBytes());
+                  var imageRef = FirebaseStorage.instance
+                      .ref('/plantImages/${_image!.path.split('/').last}.jpeg');
 
-                await Future.value(uploadTask);
+                  var uploadTask =
+                      imageRef.putData(await _image!.readAsBytes());
 
-                var newUrl = await imageRef.getDownloadURL();
-                Navigator.pop(context);
-                ref.child(id).update({
-                  'description': updatedDescriptionController.text.toString(),
-                  'image': newUrl.toString(),
-                  'name': updatedNameController.text.toString(),
-                  'season': updatedSeasonController.text.toString(),
-                  'wateringFrequency':
-                      updatedWateringFrequencyController.text.toString(),
-                  'amountOfWater':
-                      updatedAmountOfWaterController.text.toString(),
-                }).then((value) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text("Post Update"),
-                  ));
-                }).onError((error, stackTrace) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text(error.toString()),
-                  ));
-                });
-              },
-              child: const Text("Update"),
-            ),
+                  await Future.value(uploadTask);
+
+                  var newUrl = await imageRef.getDownloadURL();
+
+                  ref.child(id).update({
+                    'description': updatedDescriptionController.text.toString(),
+                    'image': newUrl.toString(),
+                    'name': updatedNameController.text.toString(),
+                    'season': updatedSeasonController.text.toString(),
+                    'wateringFrequency':
+                        updatedWateringFrequencyController.text.toString(),
+                    'amountOfWater':
+                        updatedAmountOfWaterController.text.toString(),
+                  }).then((value) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text("Encyclopedia Updated"),
+                    ));
+                    setState(() {
+                      isLoading = false;
+                    });
+                    // ignore: use_build_context_synchronously
+                    Navigator.pop(context);
+                  }).onError((error, stackTrace) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text("Try again!$error"),
+                    ));
+                  });
+                },
+                child: isLoading
+                    ? const CircularProgressIndicator()
+                    : const Text("Update"),
+              );
+            }),
           ],
         );
       },

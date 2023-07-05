@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:adminpanel/presentation/auth/services/signupServices.dart';
+import 'package:adminpanel/presentation/auth/services/sign_up_services.dart';
 import 'package:adminpanel/presentation/auth/sign_in_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +26,8 @@ class _SignUpViewState extends State<SignUpView> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   bool isObscure = true;
+
+  bool isLoading = false;
 
   emptyTextFieldSnackbar() {
     final snackBar = SnackBar(
@@ -240,6 +242,10 @@ class _SignUpViewState extends State<SignUpView> {
                             const SnackBar(content: Text('Processing')),
                           );
 
+                          setState(() {
+                            isLoading = true;
+                          });
+
                           FirebaseAuth.instance
                               .createUserWithEmailAndPassword(
                                 email: userEmail,
@@ -256,9 +262,13 @@ class _SignUpViewState extends State<SignUpView> {
                                     Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => SignInView(),
+                                        builder: (context) =>
+                                            const SignInView(),
                                       ),
                                     ),
+                                    setState(() {
+                                      isLoading = false;
+                                    }),
                                   });
                         }
 
@@ -291,15 +301,24 @@ class _SignUpViewState extends State<SignUpView> {
                         // }
                       },
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green),
-                      child: const Text("Sign up"),
+                        minimumSize: const Size(110, 50),
+                        backgroundColor: Colors.green,
+                      ),
+                      child: isLoading
+                          ? const CircularProgressIndicator()
+                          : const Text(
+                              "Sign Up",
+                              style: TextStyle(
+                                fontSize: 18,
+                              ),
+                            ),
                     ),
                     TextButton(
                       onPressed: () {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => SignInView(),
+                            builder: (context) => const SignInView(),
                           ),
                         );
                       },

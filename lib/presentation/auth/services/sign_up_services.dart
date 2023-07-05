@@ -20,7 +20,7 @@ signUpUser(
       'userId': userid.uid,
     }).then((value) => {
           FirebaseAuth.instance.signOut(),
-          Get.to(() => SignInView()),
+          Get.to(() => const SignInView()),
         });
   } on FirebaseAuthException catch (e) {
     print("Error $e");

@@ -1,6 +1,8 @@
 import 'package:adminpanel/presentation/home_view.dart';
 import 'package:adminpanel/presentation/plantEncyclopedia/plant_encyclopedia_view.dart';
+import 'package:adminpanel/presentation/products/ordered_products_view.dart';
 import 'package:adminpanel/presentation/products/product_view.dart';
+import 'package:adminpanel/presentation/services/booked_services_view.dart';
 import 'package:adminpanel/presentation/services/service_view.dart';
 import 'package:adminpanel/presentation/widgets/pop_up_menu.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +20,8 @@ class _LandingPageState extends State<LandingPage> {
     const ProductView(),
     const ServiceView(),
     const PlantEncyclopediaView(),
+    const OrderedProductsView(),
+    const BookedServicesView()
   ];
 
   int selectedIndex = 0;
@@ -99,7 +103,7 @@ class _LandingPageState extends State<LandingPage> {
                   size: 30,
                 ),
                 label: Text(
-                  "Product",
+                  "Products",
                   style: TextStyle(
                     fontSize: 18.0,
                   ),
@@ -130,6 +134,94 @@ class _LandingPageState extends State<LandingPage> {
                 ),
                 label: Text(
                   "Encyclopedia",
+                  style: TextStyle(
+                    fontSize: 16.0,
+                  ),
+                ),
+              ),
+              NavigationRailDestination(
+                selectedIcon: Stack(
+                  // ignore: prefer_const_literals_to_create_immutables
+                  children: [
+                    const Icon(
+                      Icons.shopping_bag_rounded,
+                      size: 30,
+                    ),
+                    const Positioned(
+                      right: -6,
+                      top: 4,
+                      child: Icon(
+                        Icons.check,
+                        size: 32,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                icon: Stack(
+                  // ignore: prefer_const_literals_to_create_immutables
+                  children: [
+                    const Icon(
+                      Icons.shopping_bag,
+                      size: 30,
+                    ),
+                    const Positioned(
+                      right: -6,
+                      top: 4,
+                      child: Icon(
+                        Icons.check,
+                        size: 32,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                label: const Text(
+                  "Ordered Products",
+                  style: TextStyle(
+                    fontSize: 16.0,
+                  ),
+                ),
+              ),
+              NavigationRailDestination(
+                selectedIcon: Stack(
+                  // ignore: prefer_const_literals_to_create_immutables
+                  children: [
+                    const Icon(
+                      Icons.cleaning_services_rounded,
+                      size: 30,
+                    ),
+                    const Positioned(
+                      right: -6,
+                      top: 4,
+                      child: Icon(
+                        Icons.check,
+                        size: 32,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                icon: Stack(
+                  // ignore: prefer_const_literals_to_create_immutables
+                  children: [
+                    const Icon(
+                      Icons.cleaning_services,
+                      size: 30,
+                    ),
+                    const Positioned(
+                      right: -6,
+                      top: 4,
+                      child: Icon(
+                        Icons.check,
+                        size: 32,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                label: const Text(
+                  "Booked Services",
                   style: TextStyle(
                     fontSize: 16.0,
                   ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class ForgetPasswordScreen extends StatelessWidget {
   const ForgetPasswordScreen({Key? key}) : super(key: key);
@@ -18,7 +17,7 @@ class ForgetPasswordScreen extends StatelessWidget {
                   const SizedBox(
                     height: 50,
                   ),
-                  Container(
+                  SizedBox(
                     height: constraints.maxHeight * 0.2,
                     child: Image.asset(
                       'assets/images/logo.png',
@@ -40,7 +39,7 @@ class ForgetPasswordScreen extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.only(
                           top: 10.0, bottom: 10.0, left: 20.0, right: 20.0),
-                      primary: Theme.of(context).primaryColor,
+                      backgroundColor: Theme.of(context).primaryColor,
                     ),
                     onPressed: null,
                     child: const Text(

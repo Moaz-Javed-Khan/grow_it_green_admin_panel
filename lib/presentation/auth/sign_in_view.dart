@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SignInView extends StatefulWidget {
-  SignInView({super.key});
+  const SignInView({super.key});
 
   @override
   State<SignInView> createState() => _SignInViewState();
@@ -18,6 +18,8 @@ class _SignInViewState extends State<SignInView> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   bool isObscure = true;
+
+  bool isLoading = false;
 
   emptyTextFieldSnackbar() {
     final snackBar = SnackBar(
@@ -156,6 +158,9 @@ class _SignInViewState extends State<SignInView> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Processing')),
                           );
+                          setState(() {
+                            isLoading = true;
+                          });
                           try {
                             final User? firebaseUser = (await FirebaseAuth
                                     .instance
@@ -172,10 +177,20 @@ class _SignInViewState extends State<SignInView> {
                                   builder: (context) => const LandingPage(),
                                 ),
                               );
+                              setState(() {
+                                isLoading = false;
+                              });
                             } else {
+                              // ignore: use_build_context_synchronously
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Retry')),
+                              );
                               print('Retry');
                             }
                           } on FirebaseAuthException catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Retry')),
+                            );
                             print("Error $e");
                           }
                         }
@@ -207,8 +222,17 @@ class _SignInViewState extends State<SignInView> {
                         // }
                       },
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green),
-                      child: const Text("Login"),
+                        minimumSize: const Size(110, 50),
+                        backgroundColor: Colors.green,
+                      ),
+                      child: isLoading
+                          ? const CircularProgressIndicator()
+                          : const Text(
+                              "Login",
+                              style: TextStyle(
+                                fontSize: 18,
+                              ),
+                            ),
                     ),
                     TextButton(
                       onPressed: () {

@@ -20,6 +20,8 @@ class _ServiceViewState extends State<ServiceView> {
   final updatedPerHourRateController = TextEditingController();
   final updatedCraftsmenTypeController = TextEditingController();
 
+  bool isLoading = false;
+
   XFile? _image;
   final picker = ImagePicker();
 
@@ -228,12 +230,15 @@ class _ServiceViewState extends State<ServiceView> {
                             title: Text(list[index]['name']),
                             subtitle: Row(
                               children: [
-                                // ignore: prefer_interpolation_to_compose_strings
-                                Text('${'Price: ' + list[index]['price']} Rs.'),
+                                Text(
+                                    // ignore: prefer_interpolation_to_compose_strings
+                                    '${'Initial Price: ' + list[index]['initialPrice']} Rs.'),
                                 const SizedBox(width: 20),
                                 Text(
                                     // ignore: prefer_interpolation_to_compose_strings
-                                    'Quantity: ' + list[index]['quantity']),
+                                    'Per Hour Rate: ' +
+                                        list[index]['perHourRate'] +
+                                        'Rs.'),
                               ],
                             ),
                             // ignore: prefer_const_literals_to_create_immutables
@@ -334,87 +339,90 @@ class _ServiceViewState extends State<ServiceView> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text("Update"),
-          content: Column(
-            children: [
-              TextFormField(
-                controller: updatedNameController,
-                // ignore: prefer_const_constructors
-                decoration: InputDecoration(
-                  hintText: "Name",
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: updatedDescriptionController,
-                // ignore: prefer_const_constructors
-                decoration: InputDecoration(
-                  hintText: "Description",
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: updatedInitialPriceController,
-                // ignore: prefer_const_constructors
-                decoration: InputDecoration(
-                  hintText: "Initial Price",
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: updatedPerHourRateController,
-                // ignore: prefer_const_constructors
-                decoration: InputDecoration(
-                  hintText: "Per Hour Rate",
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: updatedCraftsmenTypeController,
-                // ignore: prefer_const_constructors
-                decoration: InputDecoration(
-                  hintText: "Craftsmen Type",
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  const Text(
-                    "Select Image",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+          content: StatefulBuilder(builder: (context, setState) {
+            return Column(
+              children: [
+                TextFormField(
+                  controller: updatedNameController,
+                  // ignore: prefer_const_constructors
+                  decoration: InputDecoration(
+                    hintText: "Name",
                   ),
-                  MouseRegion(
-                    cursor: SystemMouseCursors.click,
-                    child: GestureDetector(
-                      onTap: () {
-                        getImage();
-                      },
-                      child: Center(
-                          child: _image != null
-                              ? SizedBox(
-                                  width: 100,
-                                  child: Image.network(
-                                    _image!.path,
-                                  ),
-                                )
-                              : SizedBox(
-                                  width: 100,
-                                  child: Image.network(
-                                    image,
-                                    fit: BoxFit.cover,
-                                  ),
-                                )
-                          // Icon(Icons.image),
-                          ),
-                    ),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: updatedDescriptionController,
+                  // ignore: prefer_const_constructors
+                  decoration: InputDecoration(
+                    hintText: "Description",
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: updatedInitialPriceController,
+                  // ignore: prefer_const_constructors
+                  decoration: InputDecoration(
+                    hintText: "Initial Price",
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: updatedPerHourRateController,
+                  // ignore: prefer_const_constructors
+                  decoration: InputDecoration(
+                    hintText: "Per Hour Rate",
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: updatedCraftsmenTypeController,
+                  // ignore: prefer_const_constructors
+                  decoration: InputDecoration(
+                    hintText: "Craftsmen Type",
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    const Text(
+                      "Select Image",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        onTap: () async {
+                          await getImage();
+                          setState(() {});
+                        },
+                        child: Center(
+                            child: _image != null
+                                ? SizedBox(
+                                    width: 100,
+                                    child: Image.network(
+                                      _image!.path,
+                                    ),
+                                  )
+                                : SizedBox(
+                                    width: 100,
+                                    child: Image.network(
+                                      image,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  )
+                            // Icon(Icons.image),
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          }),
           actions: [
             TextButton(
               onPressed: () {
@@ -422,38 +430,54 @@ class _ServiceViewState extends State<ServiceView> {
               },
               child: const Text("Cancel"),
             ),
-            TextButton(
-              onPressed: () async {
-                if (_image == null) return;
-                var imageRef = FirebaseStorage.instance
-                    .ref('/serviceImages/${_image!.path.split('/').last}.jpeg');
+            StatefulBuilder(builder: (context, setState) {
+              return TextButton(
+                onPressed: () async {
+                  setState(() {
+                    isLoading = true;
+                  });
 
-                var uploadTask = imageRef.putData(await _image!.readAsBytes());
+                  var imageRef = FirebaseStorage.instance.ref(
+                      '/serviceImages/${_image!.path.split('/').last}.jpeg');
 
-                await Future.value(uploadTask);
+                  var uploadTask =
+                      imageRef.putData(await _image!.readAsBytes());
 
-                var newUrl = await imageRef.getDownloadURL();
-                Navigator.pop(context);
-                ref.child(id).update({
-                  'description': updatedDescriptionController.text.toString(),
-                  'image': newUrl.toString(),
-                  'name': updatedNameController.text.toString(),
-                  'initialPrice': updatedInitialPriceController.text.toString(),
-                  'perHourRate': updatedPerHourRateController.text.toString(),
-                  'craftsmenType':
-                      updatedCraftsmenTypeController.text.toString(),
-                }).then((value) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text("Post Update"),
-                  ));
-                }).onError((error, stackTrace) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text(error.toString()),
-                  ));
-                });
-              },
-              child: const Text("Update"),
-            ),
+                  await Future.value(uploadTask);
+
+                  var newUrl = await imageRef.getDownloadURL();
+                  ref.child(id).update({
+                    'description': updatedDescriptionController.text.toString(),
+                    'image': newUrl.toString(),
+                    'name': updatedNameController.text.toString(),
+                    'initialPrice':
+                        updatedInitialPriceController.text.toString(),
+                    'perHourRate': updatedPerHourRateController.text.toString(),
+                    'craftsmenType':
+                        updatedCraftsmenTypeController.text.toString(),
+                  }).then((value) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text("Service Updated"),
+                    ));
+                    setState(() {
+                      isLoading = false;
+                    });
+                    // ignore: use_build_context_synchronously
+                    Navigator.pop(context);
+                  }).onError((error, stackTrace) {
+                    setState(() {
+                      isLoading = false;
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text("Try again!$error"),
+                    ));
+                  });
+                },
+                child: isLoading
+                    ? const CircularProgressIndicator()
+                    : const Text("Update"),
+              );
+            }),
           ],
         );
       },

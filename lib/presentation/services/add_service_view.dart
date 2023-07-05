@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -24,6 +22,8 @@ class _AddServiceViewState extends State<AddServiceView> {
 
   firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
+
+  bool isLoading = false;
 
   XFile? _image;
   final picker = ImagePicker();
@@ -150,6 +150,9 @@ class _AddServiceViewState extends State<AddServiceView> {
                 child: ElevatedButton(
                   onPressed: () async {
                     if (_image == null) return;
+                    setState(() {
+                      isLoading = true;
+                    });
                     firebase_storage.Reference ref =
                         firebase_storage.FirebaseStorage.instance.ref(
                             '/serviceImages/${_image!.path.split('/').last}.jpeg');
@@ -178,16 +181,26 @@ class _AddServiceViewState extends State<AddServiceView> {
                         content: Text("Service Added"),
                       ));
                       Navigator.pop(context);
+                      setState(() {
+                        isLoading = false;
+                      });
                     }).onError((error, stackTrace) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text("Service Not Added"),
+                      ));
                       print(error.toString());
                     });
                   },
-                  child: const Text(
-                    "Add",
-                    style: TextStyle(
-                      fontSize: 18,
-                    ),
-                  ),
+                  child: isLoading
+                      ? const CircularProgressIndicator(
+                          color: Colors.white,
+                        )
+                      : const Text(
+                          "Add",
+                          style: TextStyle(
+                            fontSize: 18,
+                          ),
+                        ),
                 ),
               )
             ],
